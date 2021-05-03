@@ -1,0 +1,33 @@
+version: '3.3'
+
+services:
+  php_im:
+    build: .
+    container_name: php_im
+    ports:
+      - 80:80
+    entrypoint: bash -c "echo -e \"`/sbin/ip route|awk '/default/ { print $$3 }'`\thost.docker.internal\" | tee -a /etc/hosts > /dev/null && /usr/local/bin/docker-php-entrypoint -k start"
+    volumes:
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./docker/apache2/httpd-vhosts.conf:/etc/apache2/sites-enabled/000-default.conf
+      - ./:/var/www/html
+      - ./storage/logs/httpd:/var/log/httpd
+    depends_on:
+      - mysql_im
+  mysql_im:
+    image: mysql:5.7
+    container_name: mysql_im
+#    restart: always
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=admin111223344455
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+volumes:
+  mysql-data:
