@@ -15,11 +15,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Auth::routes();
+// Frontend
+Route::get('/', 'TestController@home')->name('test');
+Route::get('story', 'TestController@story')->name('story');
 
-Route::get('/', 'HomeController@index')->name('home')->middleware('auth');
+// Backend
+Route::get('admin', 'HomeController@index')->name('home')->middleware('auth');
 
-Route::group(['middleware' => 'auth'], function () {
-
+Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resources([
         'users' => 'UserController',
         'providers' => 'ProviderController',
@@ -29,7 +32,7 @@ Route::group(['middleware' => 'auth'], function () {
         'transactions/transfer' => 'TransferController',
         'methods' => 'MethodController',
     ]);
-    
+
     Route::resource('transactions', 'TransactionController')->except(['create', 'show']);
     Route::get('transactions/stats/{year?}/{month?}/{day?}', ['as' => 'transactions.stats', 'uses' => 'TransactionController@stats']);
     Route::get('transactions/{type}', ['as' => 'transactions.type', 'uses' => 'TransactionController@type']);
